@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer utilities {
+  .animate-slide-up {
+    animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-slide-up-delayed {
+    animation: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.1s;
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  0% { transform: translateY(100%); opacity: 0; filter: blur(4px); }
+  100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+}
+
+body {
+  background-color: #000;
+  color: #fff;
+  overflow-x: hidden;
+}

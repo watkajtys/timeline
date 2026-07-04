@@ -1,0 +1,6 @@
+{
+  "name": "Historical Timeline Parallax",
+  "description": "A 2.5D parallax historical timeline web app featuring scroll-driven depth, era-based color themes, and strict DOM recycling.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
