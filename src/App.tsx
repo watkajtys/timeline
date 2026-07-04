@@ -3,6 +3,9 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import clsx from 'clsx';
+import { InteractiveChart } from './components/InteractiveChart';
+import { AnimatedNumber } from './components/AnimatedNumber';
+import { FadeIn } from './components/FadeIn';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,6 +26,20 @@ const ERAS = [
         { label: "Literacy Rate (Est)", value: "60%" }
       ],
       media: "https://images.unsplash.com/photo-1550592704-6c7bdef5aaf8?q=80&w=2000&auto=format&fit=crop",
+      chart: {
+        type: "area",
+        data: [
+          { year: 1700, population: 600 },
+          { year: 1720, population: 640 },
+          { year: 1740, population: 690 },
+          { year: 1760, population: 730 },
+          { year: 1780, population: 790 },
+          { year: 1800, population: 900 }
+        ],
+        dataKey: "population",
+        xAxisKey: "year",
+        color: "#fbbf24" // amber-400
+      }
     }
   },
   {
@@ -41,6 +58,19 @@ const ERAS = [
         { label: "Urbanization", value: "15%" }
       ],
       media: "https://images.unsplash.com/photo-1518177114620-80fb2b7571fa?q=80&w=2000&auto=format&fit=crop",
+      chart: {
+        type: "bar",
+        data: [
+          { year: 1800, coal: 10 },
+          { year: 1820, coal: 25 },
+          { year: 1840, coal: 75 },
+          { year: 1860, coal: 150 },
+          { year: 1880, coal: 300 }
+        ],
+        dataKey: "coal",
+        xAxisKey: "year",
+        color: "#a8a29e" // stone-400
+      }
     }
   },
   {
@@ -59,6 +89,19 @@ const ERAS = [
         { label: "Immigration (US)", value: "11M+" }
       ],
       media: "https://images.unsplash.com/photo-1617468176841-f761fc7260cb?q=80&w=2000&auto=format&fit=crop",
+      chart: {
+        type: "line",
+        data: [
+          { year: 1870, miles: 50 },
+          { year: 1880, miles: 90 },
+          { year: 1890, miles: 160 },
+          { year: 1900, miles: 190 },
+          { year: 1910, miles: 240 }
+        ],
+        dataKey: "miles",
+        xAxisKey: "year",
+        color: "#facc15" // yellow-400
+      }
     }
   },
   {
@@ -77,6 +120,18 @@ const ERAS = [
         { label: "Moon Landings", value: "6" }
       ],
       media: "https://images.unsplash.com/photo-1541186877-bb5a745edde5?q=80&w=2000&auto=format&fit=crop",
+      chart: {
+        type: "area",
+        data: [
+          { year: 1940, GDP: 2.0 },
+          { year: 1950, GDP: 3.5 },
+          { year: 1960, GDP: 5.5 },
+          { year: 1970, GDP: 8.5 }
+        ],
+        dataKey: "GDP",
+        xAxisKey: "year",
+        color: "#2dd4bf" // teal-400
+      }
     }
   },
   {
@@ -95,6 +150,19 @@ const ERAS = [
         { label: "Smartphones", value: "6.8B" }
       ],
       media: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop",
+      chart: {
+        type: "line",
+        data: [
+          { year: 1995, users: 40 },
+          { year: 2000, users: 400 },
+          { year: 2005, users: 1000 },
+          { year: 2010, users: 2000 },
+          { year: 2020, users: 4500 }
+        ],
+        dataKey: "users",
+        xAxisKey: "year",
+        color: "#818cf8" // indigo-400
+      }
     }
   }
 ];
@@ -167,18 +235,18 @@ function EraContainer({ era, index, isRendered, layout }: { key?: React.Key, era
       }
     });
 
-    // We lay them out in a wide horizontal track.
-    // The layer-content is w-max, so we translate it precisely to its end.
+    const contentTween = gsap.to('.layer-content', { 
+      x: () => {
+        const el = containerRef.current?.querySelector('.layer-content');
+        return el ? -(el.scrollWidth - window.innerWidth) : 0;
+      }, 
+      ease: 'none', 
+      duration: 0.75 
+    });
+
     tl.to('.layer-bg', { x: '-50vw', ease: 'none', duration: 0.75 }, 0)
       .to('.layer-mid', { x: '-100vw', ease: 'none', duration: 0.75 }, 0)
-      .to('.layer-content', { 
-        x: () => {
-          const el = containerRef.current?.querySelector('.layer-content');
-          return el ? -(el.scrollWidth - window.innerWidth) : 0;
-        }, 
-        ease: 'none', 
-        duration: 0.75 
-      }, 0)
+      .add(contentTween, 0)
       .to('.layer-fg', { x: '-200vw', ease: 'none', duration: 0.75 }, 0)
       // Extra parallax for the image inside its container
       .to('.media-img', { x: '-20%', ease: 'none', duration: 0.75 }, 0)
@@ -212,10 +280,14 @@ function EraContainer({ era, index, isRendered, layout }: { key?: React.Key, era
              <div className="w-[10vw] shrink-0" /> {/* Left Padding */}
              
              <div className="w-[85vw] md:w-[70vw] shrink-0 pr-10 flex flex-col justify-center">
-               <h2 className="font-display text-5xl md:text-7xl font-bold mb-6 tracking-tighter">{era.content.headline}</h2>
-               <p className="font-sans text-xl md:text-2xl leading-relaxed text-white/70 max-w-lg">
-                 {era.content.description}
-               </p>
+               <FadeIn yOffset={40}>
+                 <h2 className="font-display text-5xl md:text-7xl font-bold mb-6 tracking-tighter">{era.content.headline}</h2>
+               </FadeIn>
+               <FadeIn delay={0.2} yOffset={40}>
+                 <p className="font-sans text-xl md:text-2xl leading-relaxed text-white/70 max-w-lg">
+                   {era.content.description}
+                 </p>
+               </FadeIn>
              </div>
 
              <div className="w-[85vw] md:w-[80vw] shrink-0 px-4 md:px-10 relative flex justify-center">
@@ -227,12 +299,25 @@ function EraContainer({ era, index, isRendered, layout }: { key?: React.Key, era
 
              <div className="w-[80vw] md:w-[40vw] shrink-0 px-10 md:px-0 flex flex-col justify-center gap-10 md:gap-12">
                {era.content.stats.map((stat, i) => (
-                 <div key={i} className="border-l-2 border-white/20 pl-6 md:pl-8">
-                   <div className="font-sans text-sm md:text-lg text-white/50 mb-2 uppercase tracking-widest">{stat.label}</div>
-                   <div className="font-display text-4xl md:text-6xl font-light tracking-tighter">{stat.value}</div>
-                 </div>
+                 <FadeIn key={i} delay={i * 0.2} xOffset={40} yOffset={0}>
+                   <div className="border-l-2 border-white/20 pl-6 md:pl-8">
+                     <div className="font-sans text-sm md:text-lg text-white/50 mb-2 uppercase tracking-widest">{stat.label}</div>
+                     <div className="font-display text-4xl md:text-6xl font-light tracking-tighter">
+                       <AnimatedNumber value={stat.value} />
+                     </div>
+                   </div>
+                 </FadeIn>
                ))}
              </div>
+             
+             {era.content.chart && (
+               <div className="w-[85vw] md:w-[50vw] shrink-0 px-10 md:px-0 flex flex-col justify-center gap-6">
+                  <div className="font-sans text-sm md:text-lg text-white/50 uppercase tracking-widest">Growth Metrics</div>
+                  <div className="w-full h-[40vh]">
+                     <InteractiveChart {...(era.content.chart as any)} />
+                  </div>
+               </div>
+             )}
              
              {/* Padding at the end to allow the stats container to be centered */}
              <div className="w-[10vw] md:w-[30vw] shrink-0" />
